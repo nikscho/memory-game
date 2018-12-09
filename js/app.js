@@ -1,28 +1,20 @@
 /*
- * Create a list that holds all of your cards
- */
-
-
-/*
- * Display the cards on the page
- *   - shuffle the list of cards using the provided "shuffle" method below
- *   - loop through each card and create its HTML
- *   - add each card's HTML to the page
+ * Pexeso game
  */
 
 // Settings
-var cardNames = ["fa-gem", "fa-paper-plane", "fa-anchor", "fa-bolt", "fa-cube", "fa-leaf", "fa-bicycle", "fa-bomb", "fa-cocktail", "fa-flag-checkered", "fa-heart", "fa-snowflake", "fa-grin", "fa-umbrella-beach", "fa-dice-five", "fa-shower", "fa-tooth"] // card names to pick from, list can be as long as you wish
-var deckPairCount = 8 // deckPairCount is currently expected to be <= than cardNames.length
-var decreaseStarRatingAfterEverySuperfluousMoves = 5
+const cardNames = ["fa-gem", "fa-paper-plane", "fa-anchor", "fa-bolt", "fa-cube", "fa-leaf", "fa-bicycle", "fa-bomb", "fa-cocktail", "fa-flag-checkered", "fa-heart", "fa-snowflake", "fa-grin", "fa-umbrella-beach", "fa-dice-five", "fa-shower", "fa-tooth"] // card names to pick from, list can be as long as you wish
+const deckPairCount = 8 // deckPairCount is currently expected to be <= than cardNames.length
+const decreaseGameRatingEveryXUnsuccessfulMoves = 5
 
 // State variables
 var firstCard = null
 var gameTimer = null
+var revealedPairTimer = null
 var startTime = null
 var elapsedSeconds = 0
 var movesCounter = 0
 var matchCounter = 0
-
 
 // Shuffle function from http://stackoverflow.com/a/2450976
 function shuffle(array) {
@@ -95,18 +87,18 @@ function getGameRating() {
 	var superfluousMovesCount = movesCounter - matchCounter
 
 	if (superfluousMovesCount > 0)
-		rating -= superfluousMovesCount / decreaseStarRatingAfterEverySuperfluousMoves
+		rating -= superfluousMovesCount / decreaseGameRatingEveryXUnsuccessfulMoves
 
 	if (rating < 1) 
 		rating = 1
 	
-	return rating
+	return Math.ceil(rating)
 	}
 
 function redrawStarRating() {
 	$(".stars").empty()
 	
-	var rating = Math.ceil(getGameRating())
+	var rating = getGameRating()
 	
 	for (i = 1; i <= rating; i++)
 		$("<li><i class='fa fa-star'></i></li>").appendTo(".stars")
@@ -136,22 +128,34 @@ function isWinningConditionAchieved() {
 	return ($(".match").length == deckPairCount * 2)
 	}
 
+function winTheGame() {
+	timerStop()
+	
+	if (getGameRating() < 5)
+		$("#wonGameModalChallenge").show() // show "You can do better!" message in the modal
+
+	$("#wonGameModal .btn-primary").click(initGame)
+
+	$("#wonGameModal").modal("show")
+	}
+
+
 // Main game logic here
 function handleCardClick(event) {
 	var clickedCard = $(event.target)
 	var revealedCards = $(".card.open.show")
 
 	if (isRevealedCard(clickedCard)) {
-		console.log("Card already revealed.")
+		//console.log("Card already revealed.")
 		return false
 		}
 
 	if (isMatchedCard(clickedCard)) {
-		console.log("Card already matched.")
+		//console.log("Card already matched.")
 		return false
 		}
 
-	// One card revealed: show clicked card & test for match with previous one
+	// One card revealed: show second (clicked) card & test for match with first one
 	if (revealedCards.length == 1) {
 		clickedCard.addClass("open show")
 		incrementMoveCount()
@@ -160,28 +164,29 @@ function handleCardClick(event) {
 		var firstCardSymbol = firstCard.find("> i").attr('class')
 
 		if (clickedCardSymbol == firstCardSymbol) {
-			console.log("match!")
-			firstCard.addClass("match").removeClass("open show")
-			clickedCard.addClass("match").removeClass("open show")
+			//console.log("match!")
+			firstCard.addClass("match").removeClass("open show").animateCss('flip')
+			clickedCard.addClass("match").removeClass("open show").animateCss('flip')
+			}
+		else {
+			//console.log("no match!")
+			revealedPairTimer = setTimeout(function(){
+				firstCard.removeClass("open show")
+				clickedCard.removeClass("open show")
+				}, 1000);
 			}
 		}
 
 	// Two cards revealed: hide revealed cards & show clicked card & remember it
 	// Works for initial (no card revealed) state too
 	else /*if (revealedCards.length == 2 || revealedCards.length == 0)*/ {
+		clearInterval(revealedPairTimer)
 		revealedCards.removeClass("open show")
 		clickedCard.addClass("open show")
 		firstCard = clickedCard
 		}
 
-	if (isWinningConditionAchieved())
-		setTimeout(function(){
-			timerStop()
-
-			var playAgainModalAnswer = confirm("Congratulations! You finished the game after "+timerGetTime()+" and "+movesCounter+" moves! Reset deck now?")
-
-			if (playAgainModalAnswer == true) initGame()
-			}, 200)
+	if (isWinningConditionAchieved()) setTimeout(winTheGame, 200)
 
 	redrawStarRating()
 	}
@@ -203,14 +208,3 @@ function initGame() {
 
 initGame()
 
-
-/*
- * set up the event listener for a card. If a card is clicked:
- *  - display the card's symbol (put this functionality in another function that you call from this one)
- *  - add the card to a *list* of "open" cards (put this functionality in another function that you call from this one)
- *  - if the list already has another card, check to see if the two cards match
- *    + if the cards do match, lock the cards in the open position (put this functionality in another function that you call from this one)
- *    + if the cards do not match, remove the cards from the list and hide the card's symbol (put this functionality in another function that you call from this one)
- *    + increment the move counter and display it on the page (put this functionality in another function that you call from this one)
- *    + if all cards have matched, display a message with the final score (put this functionality in another function that you call from this one)
- */

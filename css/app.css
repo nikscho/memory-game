@@ -63,6 +63,8 @@ h1 {
     justify-content: center;
     align-items: center;
     box-shadow: 5px 2px 20px 0 rgba(46, 61, 73, 0.5);
+    transform: rotateY(180deg);
+    transition: transform 0.5s linear 0s, background 0s linear 0.25s, font-size 0s linear 0.25s; /* flip effect */
 }
 
 .deck .card i {
@@ -70,16 +72,17 @@ pointer-events: none; /* this fixes firing events on inner card icon instead of 
 }
 
 .deck .card.open {
-    transform: rotateY(0);
-    background: #02b3e4;
+    transform: rotateY(0deg);
     cursor: default;
 }
 
 .deck .card.show {
     font-size: 33px;
+    background: #02b3e4;
 }
 
 .deck .card.match {
+    transform: rotateY(0deg);
     cursor: default;
     background: #02ccba;
     font-size: 33px;
@@ -91,18 +94,26 @@ pointer-events: none; /* this fixes firing events on inner card icon instead of 
 
 .score-panel {
     text-align: left;
-    width: 345px;
     margin-bottom: 10px;
 }
 
-.score-panel .stars {
+.score-panel .column-1, .score-panel .column-2 {
+    display: inline-block;
+    width: 200px;
+}
+
+.score-panel .column-2 {
+    text-align: right;
+}
+
+.score-panel .stars, #wonGameModal .stars {
     margin: 0;
     padding: 0;
     display: inline-block;
     margin: 0 5px 0 0;
 }
 
-.score-panel .stars li {
+.score-panel .stars li, #wonGameModal .stars li {
     list-style: none;
     display: inline-block;
 }
@@ -110,6 +121,15 @@ pointer-events: none; /* this fixes firing events on inner card icon instead of 
 .score-panel .restart {
     display: inline-block;
     cursor: pointer;
-    margin-left: 30%;
     margin-right: 5px;
+}
+
+.score-panel .timer {
+    display: inline-block;
+    min-width: 40px;
+    text-align: left;
+}
+
+#wonGameModalChallenge {
+    display: none;
 }

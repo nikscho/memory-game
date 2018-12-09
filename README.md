@@ -1,20 +1,29 @@
 # Memory Game Project
 
-## Table of Contents
-
-* [Instructions](#instructions)
-* [Contributing](#contributing)
+Concentration game, also known as Match Match, Match Up, Memory, Pelmanism, Shinkei-suijaku, Pexeso or simply Pairs.
 
 ## Instructions
 
-The starter project has some HTML and CSS styling to display a static version of the Memory Game project. You'll need to convert this project from a static project to an interactive one. This will require modifying the HTML and CSS files, but primarily the JavaScript file.
+Clone the repo and run index.html in your favorite web browser.
 
-To get started, open `js/app.js` and start building out the app's functionality
+## Dependencies
 
-For specific, detailed instructions, look at the project instructions in the [Udacity Classroom](https://classroom.udacity.com/me).
+* jQuery 3.3.1
+* Bootstrap 4.1.3
+* font-awesome 5.5.0 icon font
+* Animate.css
+* Coda font
 
-## Contributing
+Dependencies are currently not included with the project, they are fetched from the internet.
+Therefore, an internet connection is required to work.
 
-This repository is the starter code for _all_ Udacity students. Therefore, we most likely will not accept pull requests.
+## Developer decisions
 
-For details, check out [CONTRIBUTING.md](CONTRIBUTING.md).
+* There was no need to include full-fledged timer library for current timer funcionality yet
+* Bootstrap is currently used only for fancy modal window
+* Basic flip animation is plain CSS transition, Animate.css is used for fancy match animation only
+
+## TODO
+
+* merge `open` and `show` classes together. It was in the template and it caused me more trouble than it's worth.
+* then I can make a proper double sided cards with fully independent styling
