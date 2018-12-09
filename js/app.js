@@ -11,9 +11,9 @@
  */
 
 // Settings
-var cardNames = ["fa-diamond", "fa-paper-plane-o", "fa-anchor", "fa-bolt", "fa-cube", "fa-leaf", "fa-bicycle", "fa-bomb", "fa-leaf"] // card names to pick from, list can be as long as you wish
+var cardNames = ["fa-gem", "fa-paper-plane", "fa-anchor", "fa-bolt", "fa-cube", "fa-leaf", "fa-bicycle", "fa-bomb", "fa-cocktail", "fa-flag-checkered", "fa-heart", "fa-snowflake", "fa-grin", "fa-umbrella-beach", "fa-dice-five", "fa-shower", "fa-tooth"] // card names to pick from, list can be as long as you wish
 var deckPairCount = 8 // deckPairCount is currently expected to be <= than cardNames.length
-var decreaseStarRatingAfterEverySuperfluousMoves = 4
+var decreaseStarRatingAfterEverySuperfluousMoves = 5
 
 // State variables
 var firstCard = null
@@ -114,8 +114,9 @@ function redrawStarRating() {
 
 // Game logic helper functions
 function shuffleCards() {
-	cardPairs = cardNames.slice(0, deckPairCount)
-	deckCards = shuffle(cardPairs.concat(cardPairs))
+	var shuffledCardNames = shuffle(cardNames)
+	var usedCardNames = shuffledCardNames.slice(0, deckPairCount) // choose deckPairCount out of shuffledCardNames.length
+	var deckCards = shuffle(usedCardNames.concat(usedCardNames))
 	
 	$(".deck").empty()
 	deckCards.forEach(function(deckCard) {
