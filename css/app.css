@@ -108,6 +108,8 @@ pointer-events: none; /* this fixes firing events on inner card icon instead of 
 }
 
 .score-panel .restart {
-    float: right;
+    display: inline-block;
     cursor: pointer;
+    margin-left: 40%;
+    margin-right: 5px;
 }

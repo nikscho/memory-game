@@ -10,10 +10,19 @@
  *   - add each card's HTML to the page
  */
 
+// Settings
+var cardNames = ["fa-diamond", "fa-paper-plane-o", "fa-anchor", "fa-bolt", "fa-cube", "fa-leaf", "fa-bicycle", "fa-bomb", "fa-leaf"] // card names to pick from, list can be as long as you wish
+var deckPairCount = 8 // deckPairCount is currently expected to be <= than cardNames.length
+var decreaseStarRatingAfterEverySuperfluousMoves = 4
+
+// State variables
 var firstCard = null
-var movesCount = 0
-var cardNames = ["fa-diamond", "fa-paper-plane-o", "fa-anchor", "fa-bolt", "fa-cube", "fa-leaf", "fa-bicycle", "fa-bomb", "fa-leaf"]
-var deckPairCount = 8
+var gameTimer = null
+var startTime = null
+var elapsedSeconds = 0
+var movesCounter = 0
+var matchCounter = 0
+
 
 // Shuffle function from http://stackoverflow.com/a/2450976
 function shuffle(array) {
@@ -30,36 +39,88 @@ function shuffle(array) {
     return array;
 }
 
-function initGame() {
-	resetMoveCount()
-	shuffleCards()
-
-	$(".restart").click(initGame)
-	$(".card").click(handleHiddenCardClick)
+// Counters
+function incrementMoveCount() {
+	movesCounter++
+	$(".moves").text(movesCounter)
 	}
 
-function incrementMoveCount(card) {
-	movesCount++
-	$(".moves").text(movesCount)
+function resetMoveCount() {
+	movesCounter = 0
+	$(".moves").text(movesCounter)
 	}
 
-function getMoveCount(card) {
-	return $(".moves").text()
+function incrementMatchCounter() {
+	matchCounter++
 	}
 
-function resetMoveCount(card) {
-	movesCount = 0
-	$(".moves").text(movesCount)
+function resetMatchCounter() {
+	matchCounter = 0
 	}
 
+// Timer
+function timerReset() {
+	elapsedSeconds = 0
+	}
+
+function timerStart() {
+	clearInterval(gameTimer)
+	gameTimer = setInterval(function(){ elapsedSeconds++; redrawTimer(); }, 1000)
+	}
+
+function timerStop() {
+	clearInterval(gameTimer)
+	}
+
+function timerGetTime() {
+	var m = Math.floor(elapsedSeconds / 60)
+	var s = Math.floor(elapsedSeconds % 60)
+
+	if (s < 10) s = "0" + s
+
+	return m + ":" + s
+	}
+
+function redrawTimer() {
+	if (elapsedSeconds)
+		$(".timer").text(timerGetTime())
+
+	else
+		$(".timer").text("0:00")
+	}
+
+// Game rating fuctions
+function getGameRating() {
+	var rating = 5
+	var superfluousMovesCount = movesCounter - matchCounter
+
+	if (superfluousMovesCount > 0)
+		rating -= superfluousMovesCount / decreaseStarRatingAfterEverySuperfluousMoves
+
+	if (rating < 1) 
+		rating = 1
+	
+	return rating
+	}
+
+function redrawStarRating() {
+	$(".stars").empty()
+	
+	var rating = Math.ceil(getGameRating())
+	
+	for (i = 1; i <= rating; i++)
+		$("<li><i class='fa fa-star'></i></li>").appendTo(".stars")
+	}
+
+// Game logic helper functions
 function shuffleCards() {
-	cardPairs = cardNames.slice(0, deckPairCount);
+	cardPairs = cardNames.slice(0, deckPairCount)
 	deckCards = shuffle(cardPairs.concat(cardPairs))
 	
 	$(".deck").empty()
 	deckCards.forEach(function(deckCard) {
 		$("<li class='card'><i class='fa "+deckCard+"'></i></li>").appendTo(".deck")
-		});
+		})
 	}
 
 function isMatchedCard(card) {
@@ -74,7 +135,8 @@ function isWinningConditionAchieved() {
 	return ($(".match").length == deckPairCount * 2)
 	}
 
-function handleHiddenCardClick(event) {
+// Main game logic here
+function handleCardClick(event) {
 	var clickedCard = $(event.target)
 	var revealedCards = $(".card.open.show")
 
@@ -104,7 +166,7 @@ function handleHiddenCardClick(event) {
 		}
 
 	// Two cards revealed: hide revealed cards & show clicked card & remember it
-	// Works for no card revealed state too
+	// Works for initial (no card revealed) state too
 	else /*if (revealedCards.length == 2 || revealedCards.length == 0)*/ {
 		revealedCards.removeClass("open show")
 		clickedCard.addClass("open show")
@@ -113,9 +175,30 @@ function handleHiddenCardClick(event) {
 
 	if (isWinningConditionAchieved())
 		setTimeout(function(){
-			alert("Congratulations! You won the game after "+getMoveCount()+" moves!")
-			}, 200);
+			timerStop()
+
+			var playAgainModalAnswer = confirm("Congratulations! You finished the game after "+timerGetTime()+" and "+movesCounter+" moves! Reset deck now?")
+
+			if (playAgainModalAnswer == true) initGame()
+			}, 200)
+
+	redrawStarRating()
 	}
+
+// Game initiator
+function initGame() {
+	resetMoveCount()
+	shuffleCards()
+	redrawStarRating()
+	timerStop()
+	timerReset()
+	redrawTimer()
+
+	$(".restart").click(initGame)
+	$(".deck").one("click", timerStart)
+	$(".card").click(handleCardClick)
+	}
+
 
 initGame()
 
